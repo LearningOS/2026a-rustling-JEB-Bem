@@ -2,7 +2,6 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -69,14 +68,52 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
-	{
-		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+	pub fn merge(mut list_a:LinkedList<T>,mut list_b:LinkedList<T>) -> Self
+    where T: PartialOrd {
+        let mut list_c = Self::new();
+        if list_a.length == 0 && list_c.length == 0 {
+            return list_c;
         }
+
+        while list_a.length > 0 && list_b.length > 0 {
+            let node_ptr;
+            if *list_a.get(0).unwrap() <= *list_b.get(0).unwrap() {
+                node_ptr = list_a.start;
+                list_a.start = unsafe { (*list_a.start.unwrap().as_ptr()).next };
+                list_a.length -= 1;
+            } else {
+                node_ptr = list_b.start;
+                list_b.start = unsafe { (*list_b.start.unwrap().as_ptr()).next };
+                list_b.length -= 1;
+            }
+            match list_c.end {
+                None => list_c.start = node_ptr,
+                Some(end_ptr) => unsafe { (*end_ptr.as_ptr()).next = node_ptr },
+            }
+            list_c.end = node_ptr;
+            list_c.length += 1;
+        }
+
+        let node_ptr;
+        if list_a.length > 0 {
+            node_ptr = list_a.start;
+            list_a.start = None;
+            list_a.end = None;
+            list_a.length = 0;
+        } else {
+            node_ptr = list_b.start;
+            list_b.start = None;
+            list_b.end = None;
+            list_b.length = 0;
+        }
+        match list_c.end {
+            None => list_c.start = node_ptr,
+            Some(end_ptr) => unsafe { (*end_ptr.as_ptr()).next = node_ptr },
+        }
+        list_c.end = node_ptr;
+        list_c.length += 1;
+
+        list_c
 	}
 }
 
